@@ -1,10 +1,10 @@
 import "./rolldown-runtime-CYGlBXrH.js";
-import { Bt as e, Disclosure as t, Ft as n, It as r, Lt as i, Rt as a, UIComponent as o, Vt as s, controlled as c, cssState as l, on as u, proto as ee, protoMerged as te, state as d, untracked as f, zt as p } from "./core.js";
+import { Bt as e, Disclosure as t, Ft as n, It as r, Lt as i, Rt as a, UIComponent as o, Vt as s, beforeNextPaint as c, controlled as l, cssState as u, on as d, onChange as ee, proto as te, protoMerged as ne, state as f, untracked as p, zt as m } from "./core.js";
 import "./ui-modal.js";
-import { Show as m } from "solid-js";
-import { className as h, createComponent as g, delegateEvents as ne, effect as _, getOwner as v, insert as y, readShallow as b, ref as x, setAttribute as S, setStyleProperty as re, style as C, template as w } from "@solidjs/web";
+import { Show as h } from "solid-js";
+import { className as g, createComponent as _, delegateEvents as re, effect as v, getOwner as y, insert as b, readShallow as x, ref as S, setAttribute as C, setStyleProperty as ie, style as w, template as T } from "@solidjs/web";
 //#region src/components/ui-zoom/ImageZoom.ts
-var T = class ImageZoom {
+var E = class ImageZoom {
 	static imageFor(e) {
 		if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
 		let t = e.target instanceof Element ? e.target : null, n = t?.closest("img") ?? t?.closest("a")?.querySelector("img");
@@ -15,7 +15,7 @@ var T = class ImageZoom {
 		let t = e.closest("a");
 		if (t && !ImageZoom.linksImage(t, e)) return !1;
 		let n = e.getBoundingClientRect();
-		return Math.max(n.width, n.height) < A ? !1 : e.naturalWidth > n.width + 1 || e.naturalHeight > n.height + 1 || !!e.closest("figure") || !!t;
+		return Math.max(n.width, n.height) < se ? !1 : e.naturalWidth > n.width + 1 || e.naturalHeight > n.height + 1 || !!e.closest("figure") || !!t;
 	}
 	static onClick = (e) => {
 		let t = ImageZoom.imageFor(e);
@@ -23,51 +23,85 @@ var T = class ImageZoom {
 	};
 	static onPointerOver = (e) => {
 		let t = e.target instanceof HTMLImageElement ? e.target : null;
-		t && !t.hasAttribute(O) && ImageZoom.isZoomable(t) && t.setAttribute(O, "");
+		t && !t.hasAttribute(k) && ImageZoom.isZoomable(t) && t.setAttribute(k, "");
 	};
 	static show(e) {
-		let t = document.querySelector(`body > ${E}[${k}]`);
-		t || (t = document.createElement(E), t.setAttribute(k, ""), document.body.append(t));
+		let t = document.querySelector(`body > ${D}[${A}]`);
+		t || (t = document.createElement(D), t.setAttribute(A, ""), document.body.append(t));
 		let n = e.getRootNode();
 		ImageZoom.shown = n instanceof ShadowRoot ? n.host : e, t.setAttribute("alt", e.alt), t.setAttribute("src", e.currentSrc || e.src);
 	}
 	static bounce(e, t) {
-		if (!e || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-		let n = `translateY(${t > 0 ? -D : D}px)`;
+		if (!e || O.isStill()) return;
+		let n = `translateY(${t > 0 ? -O.bouncePx : O.bouncePx}px)`;
 		e.animate([
 			{ transform: "none" },
 			{ transform: n },
 			{ transform: "none" }
 		], {
-			duration: ie,
+			duration: O.bounceMs,
 			easing: "ease-out"
 		});
 	}
+	static async slide(e, t, n) {
+		let r = e.shadowRoot?.querySelector(".figure");
+		if (!r || O.isStill()) return n();
+		let i = r.getBoundingClientRect(), a = r.cloneNode(!0);
+		Object.assign(a.style, {
+			position: "fixed",
+			left: `${i.left}px`,
+			top: `${i.top}px`,
+			width: `${i.width}px`,
+			margin: "0",
+			pointerEvents: "none"
+		}), r.after(a);
+		let o = t > 0 ? "-100vh" : "100vh", s = t > 0 ? "100vh" : "-100vh";
+		r.style.transform = `translateY(${s})`, n(), await new Promise((e) => c(() => e(void 0))), await r.querySelector("img")?.decode().catch(() => void 0);
+		let l = {
+			duration: O.slideMs,
+			easing: O.ease
+		};
+		a.animate([{ transform: "none" }, { transform: `translateY(${o})` }], l).finished.then(() => a.remove(), () => a.remove()), r.animate([{ transform: `translateY(${s})` }, { transform: "none" }], l).finished.then(() => r.style.transform = "", () => r.style.transform = "");
+	}
 	static shown;
 	static zoomables() {
-		return [...document.querySelectorAll(ae)].filter((e) => e instanceof HTMLImageElement ? ImageZoom.isZoomable(e) : !e.hasAttribute(k));
+		return [...document.querySelectorAll(ae)].filter((e) => e instanceof HTMLImageElement ? ImageZoom.isZoomable(e) : !e.hasAttribute(A));
 	}
 	static step(e, t, n) {
 		let r = ImageZoom.zoomables();
 		if (r.length < 2) return;
 		let i = r.indexOf(t ?? ImageZoom.shown), a = r[(i < 0 ? e > 0 ? -1 : r.length : i) + e];
 		if (!a) {
-			let n = t ?? document.querySelector(`body > ${E}[${k}]`);
-			ImageZoom.bounce(n?.shadowRoot?.querySelector(t ? ".content" : "img"), e);
+			let n = t ?? document.querySelector(`body > ${D}[${A}]`);
+			ImageZoom.bounce(n?.shadowRoot?.querySelector(t ? ".content" : ".figure"), e);
 			return;
 		}
-		if (a.localName === E) {
+		if (a.localName === D) {
 			n(), a.shadowRoot?.querySelector("button.show")?.click();
 			return;
 		}
 		let o = a instanceof HTMLImageElement ? a : a.shadowRoot?.querySelector("img");
-		o && (ImageZoom.show(o), t && n());
+		if (!o) return;
+		if (t) {
+			ImageZoom.show(o), n();
+			return;
+		}
+		let s = document.querySelector(`body > ${D}[${A}]`);
+		s ? ImageZoom.slide(s, e, () => ImageZoom.show(o)) : ImageZoom.show(o);
 	}
 	static linksImage(e, t) {
 		let n = e.href;
-		return !n || n === t.src || n === t.currentSrc || j.test(n);
+		return !n || n === t.src || n === t.currentSrc || ce.test(n);
 	}
-}, E = "ui-zoom", D = 40, ie = 320, ae = "ui-zoom, ui-image[zoom], img", O = "data-ui-zoom", k = "data-spell-added", oe = "[data-no-zoom], button, ui-button, ui-zoom", A = 64, j = /^data:image\/|\.(png|jpe?g|gif|webp|avif|svg)([?#]|$)/i, M = {
+}, D = "ui-zoom", O = {
+	ease: "cubic-bezier(.2, .8, .2, 1)",
+	growMs: 320,
+	shrinkMs: 240,
+	slideMs: 380,
+	bouncePx: 40,
+	bounceMs: 320,
+	isStill: () => matchMedia("(prefers-reduced-motion: reduce)").matches
+}, ae = "ui-zoom, ui-image[zoom], img", k = "data-ui-zoom", A = "data-spell-added", oe = "[data-no-zoom], button, ui-button, ui-zoom", se = 64, ce = /^data:image\/|\.(png|jpe?g|gif|webp|avif|svg)([?#]|$)/i, le = {
 	tag: "ui-zoom",
 	topics: [
 		"images",
@@ -177,19 +211,19 @@ var T = class ImageZoom {
 			description: "The zoomed image's alt text, when it had none."
 		}
 	]
-}, N = "@layer ui.components.zoom.types{:host{--_ui-zoom-margin:var(--ui-zoom-margin,24px);--_ui-zoom-caption:var(--ui-zoom-caption,2.5em);--_ui-zoom-radius:var(--ui-zoom-radius,var(--ui-radius,4px));inline-size:fit-content;max-inline-size:100%;display:block}:host([src]){display:contents}.view{box-sizing:border-box;border-radius:var(--_ui-zoom-radius);inline-size:fit-content;max-inline-size:100%;position:relative;overflow:hidden}.shrunk{pointer-events:none}.show{border-radius:inherit;cursor:zoom-in;background:0 0;border:0;margin:0;padding:0;position:absolute;inset:0}.show:focus-visible{outline:2px solid var(--ui-focus-color,Highlight);outline-offset:-2px}ui-modal{--ui-modal-dimmer-background:var(--ui-zoom-backdrop,oklch(0% 0 0/.9))}ui-modal::part(modal){width:auto;max-width:none;max-height:none;box-shadow:none;background:0 0;margin:auto;padding:0;overflow:visible}ui-modal::part(close){color:#fff;position:fixed;top:12px;right:12px}.figure{cursor:zoom-out;flex-direction:column;align-items:center;gap:8px;margin:0;display:flex}.image{max-width:calc(100vw - 2 * var(--_ui-zoom-margin));max-height:calc(100vh - 2 * var(--_ui-zoom-margin) - var(--_ui-zoom-caption));object-fit:contain;border-radius:var(--_ui-zoom-radius);display:block}.caption{max-width:calc(100vw - 2 * var(--_ui-zoom-margin));color:#fff;text-align:center;line-height:1.4}.content{box-sizing:border-box;inline-size:fit-content;max-width:calc(100vw - 2 * var(--_ui-zoom-margin));max-height:calc(100vh - 2 * var(--_ui-zoom-margin));padding:var(--ui-zoom-padding,16px);border-radius:var(--_ui-zoom-radius);background:var(--ui-zoom-background,var(--ui-surface,Canvas));color:var(--ui-text-color,CanvasText);margin-inline:auto;overflow:auto}}", se = /* @__PURE__ */ w("<div inert><slot>"), ce = /* @__PURE__ */ w("<div><button type=button aria-haspopup=dialog>"), le = /* @__PURE__ */ w("<ui-modal appearance=basic closable>", 1), ue = /* @__PURE__ */ w("<figcaption>"), de = /* @__PURE__ */ w("<figure><img>"), fe = /* @__PURE__ */ w("<div><div><slot>"), P, F, I, L, R, z, B, V, H, U, W, G, K, q, J, Y = class _UIZoom extends (W = o, U = [ee], H = [te], V = [l("open"), c("open")], B = [d], z = [d], R = [f], L = [u("ui-closed", { target: "renderRoot" })], I = [u("click", { target: "renderRoot" })], F = [u("keydown", { target: "renderRoot" })], P = [f], W) {
+}, ue = "@layer ui.components.zoom.types{:host{--_ui-zoom-margin:var(--ui-zoom-margin,24px);--_ui-zoom-caption:var(--ui-zoom-caption,2.5em);--_ui-zoom-radius:var(--ui-zoom-radius,var(--ui-radius,4px));inline-size:fit-content;max-inline-size:100%;display:block}:host([src]){display:contents}.view{box-sizing:border-box;border-radius:var(--_ui-zoom-radius);inline-size:fit-content;max-inline-size:100%;position:relative;overflow:hidden}.shrunk{pointer-events:none}.show{border-radius:inherit;cursor:zoom-in;background:0 0;border:0;margin:0;padding:0;position:absolute;inset:0}.show:focus-visible{outline:2px solid var(--ui-focus-color,Highlight);outline-offset:-2px}ui-modal{--ui-modal-dimmer-background:var(--ui-zoom-backdrop,oklch(0% 0 0/.9))}ui-modal::part(modal){width:auto;max-width:none;max-height:none;box-shadow:none;background:0 0;margin:auto;padding:0;overflow:visible;transform:none}ui-modal::part(close){color:#fff;position:fixed;top:12px;right:12px}.figure{cursor:zoom-out;flex-direction:column;align-items:center;gap:8px;margin:0;display:flex}.image{max-width:calc(100vw - 2 * var(--_ui-zoom-margin));max-height:calc(100vh - 2 * var(--_ui-zoom-margin) - var(--_ui-zoom-caption));object-fit:contain;border-radius:var(--_ui-zoom-radius);display:block}.caption{max-width:calc(100vw - 2 * var(--_ui-zoom-margin));color:#fff;text-align:center;line-height:1.4}.content{box-sizing:border-box;inline-size:fit-content;max-width:calc(100vw - 2 * var(--_ui-zoom-margin));max-height:calc(100vh - 2 * var(--_ui-zoom-margin));padding:var(--ui-zoom-padding,16px);border-radius:var(--_ui-zoom-radius);background:var(--ui-zoom-background,var(--ui-surface,Canvas));color:var(--ui-text-color,CanvasText);margin-inline:auto;overflow:auto}}", de = /* @__PURE__ */ T("<div inert><slot>"), fe = /* @__PURE__ */ T("<div><button type=button aria-haspopup=dialog>"), pe = /* @__PURE__ */ T("<ui-modal appearance=basic closable>", 1), me = /* @__PURE__ */ T("<figcaption>"), he = /* @__PURE__ */ T("<figure><img>"), ge = /* @__PURE__ */ T("<div><div><slot>"), j, M, N, P, F, I, L, R, z, B, V, H, U, W, G, K, q, J, Y = class _UIZoom extends (W = o, U = [te], H = [ne], V = [u("open"), l("open")], B = [f], z = [f], R = [p], L = [d("ui-closed", { target: "renderRoot" })], I = [d("ui-closing", { target: "renderRoot" })], F = [d("click", { target: "renderRoot" })], P = [ee("src", "isOpen")], N = [p], M = [d("keydown", { target: "renderRoot" })], j = [p], W) {
 	constructor() {
-		super(...arguments), s(G, 5, this), p(this, K, s(G, 8, this, !1)), s(G, 11, this), e(this, "disclosure", new t({
+		super(...arguments), s(G, 5, this), m(this, K, s(G, 8, this, !1)), s(G, 11, this), e(this, "disclosure", new t({
 			component: this,
 			member: "isOpen"
-		})), p(this, q, s(G, 12, this)), s(G, 15, this), p(this, J, s(G, 16, this)), s(G, 19, this), e(this, "view"), e(this, "modal");
+		})), m(this, q, s(G, 12, this)), s(G, 15, this), m(this, J, s(G, 16, this)), s(G, 19, this), e(this, "view"), e(this, "modal"), e(this, "wasShowing", !1), e(this, "isShrinking", !1);
 	}
 	get isShowing() {
 		return !!this.src || this.isOpen;
 	}
 	get shrinkRatio() {
 		let e = Number.parseFloat(this.shrink ?? "");
-		return !Number.isFinite(e) || e <= 0 ? me : Math.min(e, 100) / 100;
+		return !Number.isFinite(e) || e <= 0 ? be : Math.min(e, 100) / 100;
 	}
 	get viewStyle() {
 		let e = {};
@@ -208,7 +242,7 @@ var T = class ImageZoom {
 				width: t.width,
 				height: t.height
 			};
-			let n = e.querySelector(`.${Q}`);
+			let n = e.querySelector(`.${Z}`);
 			n && (this.fullWidth = Math.round(n.getBoundingClientRect().width / this.shrinkRatio));
 		}
 		this.disclosure.open();
@@ -216,55 +250,116 @@ var T = class ImageZoom {
 	onClosed(e) {
 		e.target === this.modal && this.shut();
 	}
+	onClosing(e) {
+		e.target === this.modal && (this.isShrinking || this.canMove()) && (e.preventDefault(), this.dismiss());
+	}
 	onClick(e) {
-		e.target instanceof Element && e.target.closest(`.${$}`) && this.shut();
+		e.target instanceof Element && e.target.closest(`.${Q}`) && this.dismiss();
+	}
+	onShowingChanged() {
+		let e = this.isShowing;
+		e && !this.wasShowing && this.grow(), this.wasShowing = e;
+	}
+	get zoomed() {
+		return this.modal?.querySelector(`.${$}, .${we}`) ?? null;
+	}
+	get placeOnPage() {
+		let e;
+		if (this.src) {
+			let t = E.shown, n = t instanceof HTMLImageElement ? t : t?.shadowRoot?.querySelector("img");
+			n?.isConnected && (n.currentSrc || n.src) === this.src && (e = n.getBoundingClientRect());
+		} else e = this.view?.getBoundingClientRect();
+		return e?.width ? e : void 0;
+	}
+	canMove() {
+		return !O.isStill() && !!this.zoomed && !!this.placeOnPage;
+	}
+	static over(e, t) {
+		return `translate(${e.left + e.width / 2 - (t.left + t.width / 2)}px, ${e.top + e.height / 2 - (t.top + t.height / 2)}px) scale(${e.width / t.width})`;
+	}
+	async grow() {
+		if (O.isStill()) return;
+		let e = this.zoomed;
+		for (let t = 0; !e && t < ye; t++) await new Promise((e) => c(() => e(void 0))), e = this.zoomed;
+		let t = this.placeOnPage;
+		if (!e || !t) return;
+		e instanceof HTMLImageElement && await e.decode().catch(() => void 0);
+		let n = [{
+			transform: _UIZoom.over(t, e.getBoundingClientRect()),
+			opacity: .6
+		}, {
+			transform: "none",
+			opacity: 1
+		}];
+		e.animate(n, {
+			duration: O.growMs,
+			easing: O.ease
+		});
+	}
+	async dismiss() {
+		if (this.isShrinking) return;
+		let e = this.zoomed, t = this.placeOnPage;
+		if (!e || !t || O.isStill()) return this.shut();
+		this.isShrinking = !0;
+		let n = [{
+			transform: "none",
+			opacity: 1
+		}, {
+			transform: _UIZoom.over(t, e.getBoundingClientRect()),
+			opacity: .4
+		}];
+		await e.animate(n, {
+			duration: O.shrinkMs,
+			easing: O.ease,
+			fill: "forwards"
+		}).finished.catch(() => void 0), this.isShrinking = !1, this.shut();
 	}
 	onKeyDown(e) {
-		let t = pe[e.key];
+		let t = _e[e.key];
 		if (!t || e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || !this.isShowing) return;
 		let n = e.composedPath()[0];
-		n instanceof HTMLElement && n.matches(Z) || (e.preventDefault(), T.step(t, this.src ? void 0 : this.domElement, () => this.shut()));
+		n instanceof HTMLElement && n.matches(ve) || (e.preventDefault(), E.step(t, this.src ? void 0 : this.domElement, () => this.shut()));
 	}
 	shut() {
 		this.src && this.domElement.removeAttribute("src"), this.disclosure.close();
 	}
 	render() {
 		let e = this;
-		return [g(m, {
+		return [_(h, {
 			get when() {
 				return !e.src;
 			},
 			get children() {
-				var t = ce(), n = t.firstChild;
-				return x(() => (t) => e.view = t, t), y(t, g(m, {
+				var t = fe(), n = t.firstChild;
+				return S(() => (t) => e.view = t, t), b(t, _(h, {
 					get when() {
 						return !e.isOpen;
 					},
 					get children() {
-						var t = se(), n = t.firstChild;
-						return n._$owner = v(), _(() => ({
-							e: b(Q),
+						var t = de(), n = t.firstChild;
+						return n._$owner = y(), v(() => ({
+							e: x(Z),
 							t: String(e.shrinkRatio)
 						}), ({ e, t: n }, r) => {
-							h(t, e, r?.e), n !== r?.t && re(t, "zoom", n);
+							g(t, e, r?.e), n !== r?.t && ie(t, "zoom", n);
 						}), t;
 					}
-				}), n), n._$$click = () => e.showFullSize(), _(() => ({
-					e: b(he),
+				}), n), n._$$click = () => e.showFullSize(), v(() => ({
+					e: x(xe),
 					t: e.partForName("view"),
-					a: b(e.viewStyle),
-					o: b(ge),
+					a: x(e.viewStyle),
+					o: x(Se),
 					i: e.partForName("button"),
 					n: e.translationForKey("show"),
 					s: e.disclosure.ariaExpanded,
 					h: e.translationForKey("show")
 				}), ({ e, t: r, a: i, o: a, i: o, n: s, s: c, h: l }, u) => {
-					h(t, e, u?.e), r !== u?.t && S(t, "part", r), C(t, i, u?.a), h(n, a, u?.o), o !== u?.i && S(n, "part", o), s !== u?.n && S(n, "aria-label", s), c !== u?.s && S(n, "aria-expanded", c), l !== u?.h && S(n, "title", l);
+					g(t, e, u?.e), r !== u?.t && C(t, "part", r), w(t, i, u?.a), g(n, a, u?.o), o !== u?.i && C(n, "part", o), s !== u?.n && C(n, "aria-label", s), c !== u?.s && C(n, "aria-expanded", c), l !== u?.h && C(n, "title", l);
 				}), t;
 			}
 		}), (() => {
-			var t = le();
-			return x(() => (t) => e.modal = t, t), t._$owner = v(), y(t, g(m, {
+			var t = pe();
+			return S(() => (t) => e.modal = t, t), t._$owner = y(), b(t, _(h, {
 				get when() {
 					return e.src;
 				},
@@ -272,69 +367,69 @@ var T = class ImageZoom {
 					return e.fullContent();
 				},
 				children: (t) => (() => {
-					var n = de(), r = n.firstChild;
-					return y(n, g(m, {
+					var n = he(), r = n.firstChild;
+					return b(n, _(h, {
 						get when() {
 							return e.alt;
 						},
 						get children() {
-							var t = ue();
-							return y(t, () => e.alt), _(() => ({
-								e: b(ve),
+							var t = me();
+							return b(t, () => e.alt), v(() => ({
+								e: x(Ce),
 								t: e.partForName("caption")
 							}), ({ e, t: n }, r) => {
-								h(t, e, r?.e), n !== r?.t && S(t, "part", n);
+								g(t, e, r?.e), n !== r?.t && C(t, "part", n);
 							}), t;
 						}
-					}), null), _(() => ({
-						e: b($),
-						t: b(_e),
+					}), null), v(() => ({
+						e: x(Q),
+						t: x($),
 						a: e.partForName("image"),
 						o: t(),
 						i: e.alt ? e.translationForKey("zoomed", { alt: e.alt }) : e.translationForKey("untitled")
 					}), ({ e, t, a: i, o: a, i: o }, s) => {
-						h(n, e, s?.e), h(r, t, s?.t), i !== s?.a && S(r, "part", i), a !== s?.o && S(r, "src", a), o !== s?.i && S(r, "alt", o);
+						g(n, e, s?.e), g(r, t, s?.t), i !== s?.a && C(r, "part", i), a !== s?.o && C(r, "src", a), o !== s?.i && C(r, "alt", o);
 					}), n;
 				})()
-			})), _(() => ({
-				e: b(e.rootClass),
+			})), v(() => ({
+				e: x(e.rootClass),
 				t: e.partForName("base"),
 				a: e.isShowing ? "" : void 0
 			}), ({ e, t: n, a: r }, i) => {
-				h(t, e, i?.e), n !== i?.t && S(t, "part", n), r !== i?.a && S(t, "visible", r);
+				g(t, e, i?.e), n !== i?.t && C(t, "part", n), r !== i?.a && C(t, "visible", r);
 			}), t;
 		})()];
 	}
 	fullContent() {
 		let e = this;
-		return g(m, {
+		return _(h, {
 			get when() {
 				return e.isOpen;
 			},
 			get children() {
-				var t = fe(), n = t.firstChild, r = n.firstChild;
-				return r._$owner = v(), _(() => ({
-					e: b(ye),
+				var t = ge(), n = t.firstChild, r = n.firstChild;
+				return r._$owner = y(), v(() => ({
+					e: x(we),
 					t: e.partForName("content"),
-					a: b(e.fullWidth ? { "inline-size": `${e.fullWidth}px` } : void 0)
+					a: x(e.fullWidth ? { "inline-size": `${e.fullWidth}px` } : void 0)
 				}), ({ e, t: r, a: i }, a) => {
-					h(t, e, a?.e), r !== a?.t && S(t, "part", r), C(n, i, a?.a);
+					g(t, e, a?.e), r !== a?.t && C(t, "part", r), w(n, i, a?.a);
 				}), t;
 			}
 		});
 	}
 };
-G = i(W), K = /* @__PURE__ */ new WeakMap(), q = /* @__PURE__ */ new WeakMap(), J = /* @__PURE__ */ new WeakMap(), n(G, 4, "isOpen", V, Y, K), n(G, 4, "heldSize", B, Y, q), n(G, 4, "fullWidth", z, Y, J), n(G, 1, "showFullSize", R, Y), n(G, 1, "onClosed", L, Y), n(G, 1, "onClick", I, Y), n(G, 1, "onKeyDown", F, Y), n(G, 1, "shut", P, Y), n(G, 13, "vocabulary", U, Y), n(G, 13, "elementSetup", H, Y), r(G, Y), a(Y, "UIZoom"), e(Y, "vocabulary", s(G, 20, Y, M)), s(G, 23, Y), e(Y, "elementSetup", s(G, 24, Y, { styleSheets: { zoom: N } })), s(G, 27, Y);
-var X = Y, pe = {
+G = i(W), K = /* @__PURE__ */ new WeakMap(), q = /* @__PURE__ */ new WeakMap(), J = /* @__PURE__ */ new WeakMap(), n(G, 4, "isOpen", V, Y, K), n(G, 4, "heldSize", B, Y, q), n(G, 4, "fullWidth", z, Y, J), n(G, 1, "showFullSize", R, Y), n(G, 1, "onClosed", L, Y), n(G, 1, "onClosing", I, Y), n(G, 1, "onClick", F, Y), n(G, 1, "onShowingChanged", P, Y), n(G, 1, "dismiss", N, Y), n(G, 1, "onKeyDown", M, Y), n(G, 1, "shut", j, Y), n(G, 13, "vocabulary", U, Y), n(G, 13, "elementSetup", H, Y), r(G, Y), a(Y, "UIZoom"), e(Y, "vocabulary", s(G, 20, Y, le)), s(G, 23, Y), e(Y, "elementSetup", s(G, 24, Y, { styleSheets: { zoom: ue } })), s(G, 27, Y);
+var X = Y, _e = {
 	ArrowRight: 1,
 	ArrowDown: 1,
 	ArrowLeft: -1,
 	ArrowUp: -1
-}, Z = "input:not([type=checkbox], [type=radio], [type=button]), textarea, select, [contenteditable]", me = .5, he = "view", Q = "shrunk", ge = "show", $ = "figure", _e = "image", ve = "caption", ye = "content";
+}, ve = "input:not([type=checkbox], [type=radio], [type=button]), textarea, select, [contenteditable]", ye = 30, be = .5, xe = "view", Z = "shrunk", Se = "show", Q = "figure", $ = "image", Ce = "caption", we = "content";
 //#endregion
 //#region src/components/ui-zoom/index.ts
-ne(["click"]), X.define();
+re(["click"]), X.define();
 //#endregion
-export { T as ImageZoom, X as UIZoom };
+export { E as ImageZoom, X as UIZoom };
 
 //# sourceMappingURL=ui-zoom.js.map
