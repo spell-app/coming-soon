@@ -62,10 +62,23 @@ figure.panel ui-image { box-sizing: border-box; width: 100%; background: #ffffff
 figcaption { color: var(--muted); font-style: italic; margin-top: .9em; padding: 0 4px; }
 a { color: var(--accent); }
 @media (max-width: 600px) { body { font-size: 17px; } figure.panel ui-image { padding: 10px; } }
-.stamp { position: fixed; top: 22px; right: 22px; width: clamp(150px, 22vw, 260px); transform: rotate(-9deg); opacity: 1; pointer-events: none; z-index: 10; mix-blend-mode: multiply; }
+.stamp { position: fixed; top: 40px; right: 22px; width: clamp(150px, 22vw, 260px); transform: rotate(9deg); opacity: 1; pointer-events: none; z-index: 10; mix-blend-mode: multiply; }
 @media (prefers-color-scheme: dark) { .stamp { mix-blend-mode: normal; filter: brightness(1.35); } }
-@media (max-width: 600px) { .stamp { top: 12px; right: 8px; width: 130px; } }
+@media (max-width: 600px) { .stamp { top: 42px; right: 8px; width: 130px; } }
+.indent {position: relative; width:200px;}
+.email {
+  color: var(--accent);
+  cursor: pointer;
+  &:hover {
+    text-decoration: underline;
+  }
+}
 </style>
+<script>
+  function email() {
+    window.location.href = "mailto:"+"ownoak"+"@"+"gmail.com"
+  }
+</script>
 </head>
 <body>
 <img class="stamp" data-no-zoom src="images/coming-soon.svg" alt="Coming soon">
@@ -73,58 +86,67 @@ a { color: var(--accent); }
 <h1>Spell</h1>
 <p class="tagline"><strong>Programs you can read out loud.</strong></p>
 
-<figure class="card"><div class="sample" role="img" aria-label="A playing card, in Spell:  a &quot;card&quot; is a view, with its suit, color, rank, and whether it is a face card"><span style="--level:0"><b class="o">a</b> <i class="g">&quot;card&quot;</i> <b class="o">is a</b> <b class="v">view:</b></span><span style="--level:1"><b class="p">- its</b> <i class="t">&quot;suit&quot;</i> <b class="o">is one of</b> <b class="r">clubs</b><b class="p">,</b> <b class="r">diamonds</b><b class="p">,</b> <b class="r">hearts</b> <b class="o">or</b> <b class="r">spades</b></span><span style="--level:1"><b class="p">- its</b> <i class="t">&quot;color&quot;</i> <b class="p">is:</b></span><span style="--level:2"><b class="r">red</b> <b class="o">if its</b> <b class="t">suit</b> <b class="o">is</b> <b class="r">diamonds</b> <b class="o">or</b> <b class="r">hearts</b></span><span style="--level:2"><b class="r">black</b> <b class="o">otherwise</b></span><span style="--level:1"><b class="p">- its</b> <i class="t">&quot;rank&quot;</i> <b class="o">is one of</b> <b class="r">ace</b><b class="p">,</b> <b class="r">2 ... 10</b><b class="p">,</b> <b class="r">jack</b><b class="p">,</b> <b class="r">queen</b><b class="p">,</b> <b class="r">king</b></span><span style="--level:1"><b class="p">- it</b> <i class="t">&quot;is a face card&quot;</i> <b class="o">if its</b> <b class="t">rank</b> <b class="o">is</b> <b class="r">jack</b><b class="p">,</b> <b class="r">queen</b> <b class="o">or</b> <b class="r">king</b></span></div></figure>
+<figure class="card">
+  <div class="sample" role="img" aria-label="A playing card, in Spell:  a &quot;card&quot; is a view, with its suit, color, rank, and whether it is a face card"><span style="--level:0"><b class="o">a</b> <i class="g">&quot;card&quot;</i> <b class="o">is a</b> <b class="v">view:</b></span><span style="--level:1"><b class="p">- its</b> <i class="t">&quot;suit&quot;</i> <b class="o">is one of</b> <b class="r">clubs</b><b class="p">,</b> <b class="r">diamonds</b><b class="p">,</b> <b class="r">hearts</b> <b class="o">or</b> <b class="r">spades</b></span><span style="--level:1"><b class="p">- its</b> <i class="t">&quot;color&quot;</i> <b class="p">is:</b></span><span style="--level:2"><b class="r">red</b> <b class="o">if its</b> <b class="t">suit</b> <b class="o">is</b> <b class="r">diamonds</b> <b class="o">or</b> <b class="r">hearts</b></span><span style="--level:2"><b class="r">black</b> <b class="o">otherwise</b></span><span style="--level:1"><b class="p">- its</b> <i class="t">&quot;rank&quot;</i> <b class="o">is one of</b> <b class="r">ace</b><b class="p">,</b> <b class="r">2 ... 10</b><b class="p">,</b> <b class="r">jack</b><b class="p">,</b> <b class="r">queen</b><b class="p">,</b> <b class="r">king</b></span><span style="--level:1"><b class="p">- it</b> <i class="t">&quot;is a face card&quot;</i> <b class="o">if its</b> <b class="t">rank</b> <b class="o">is</b> <b class="r">jack</b><b class="p">,</b> <b class="r">queen</b> <b class="o">or</b> <b class="r">king</b></span></div></figure>
 
 
-<p>You just read a program.<br>
+<p><b>You just read a program.</b><br>
 Nobody taught you its syntax, and you could explain it to a friend.</p>
 
 <p>It isn't pseudo-code, and it isn't an AI prompt:</p>
 <ul>
-<li>a rule-based parser reads Spell the same way every time</li>
+<li>a rule-based parser reads Spell the same way every time, and</li>
 <li>it compiles to optimized, readable code you can run right on the web.</li>
 </ul>
 
 <h2>Solitaire in Spell</h2>
 <figure class="wide"><ui-image zoom src="images/solitaire.png" width="1728" height="990" alt="Solitaire in the Spell editor, a card selected in the Inspector"></ui-image>
-<figcaption>Solitaire in Spell -- animated, drag-and-drop, fully playable.</figcaption></figure>
+<figcaption>Solitaire in Spell &ndash; animated with drag-and-drop &ndash; in less than 400 lines of code.</figcaption></figure>
 
 <h2>¡El mismo juego, en español!</h2>
 <figure class="wide"><ui-image zoom src="images/solitario.png" width="1728" height="990" alt="Solitaire in Spanish, its code and the Spell editor both in Spanish" loading="lazy"></ui-image>
-<figcaption>The same game, code and interface in Spanish, with automatic translation.</figcaption></figure>
+<figcaption>The same game &mdash; code and interface in Spanish &ndash; with automatic translation.</figcaption></figure>
 
 <h2>All magic, no fuss!</h2>
 <figure class="panel"><ui-image zoom src="images/languages-and-targets.svg" alt="One parser, several languages in, several targets out" loading="lazy"></ui-image></figure>
 <ul>
-<li><strong>A language</strong> that reads like <strong>English</strong> (and <strong>Spanish</strong>):  types, properties and actions are sentences.</li>
-<li><strong>A compiler</strong> to <strong>JavaScript</strong>, <strong>TypeScript</strong> and <strong>Python</strong>, so what you write runs where you need it.</li>
+<li><strong>A language</strong> that reads like <strong>English</strong> (and <strong>Spanish</strong>, soon French, German...) 
+  <br/>&ndash; types, properties and actions are sentences.</li>
+<li><strong>A compiler</strong> to <strong>JavaScript</strong>, <strong>TypeScript</strong> and <strong>Python</strong>
+  <br/>&ndash; so what you write runs where you need it.</li>
 <li><strong>An editor</strong> where the program, the running app and its output sit side by side.</li>
 </ul>
 
 <h2>Spell UI</h2>
-<p>A full set of beautifully themed web components (<code>&lt;ui-button&gt;</code>, <code>&lt;ui-theme-editor&gt;</code> ...)<br>
-that work in any page, with or without the rest of Spell.</p>
+<p>A full set of beautifully themed web components (<code>&lt;ui-button&gt;</code>, <code>&lt;ui-theme-selector&gt;</code>)
+  <br>that work in any page, with or without the rest of Spell.</p>
 <figure class="panel"><ui-image zoom src="images/spell-ui.png" alt="Spell UI's button page on a phone, a tablet and a laptop, on the Fruity theme" loading="lazy"></ui-image></figure>
 
 <h2>Status</h2>
 <p>Working now:</p>
 <ul>
-<li><strong>Spell</strong>, the language:  <strong>English</strong> and <strong>Spanish</strong>, in sentences or an outline.</li>
+<li><strong>Spell</strong>, the language:  <strong>English</strong> and <strong>Spanish</strong>, in sentences or outline form.</li>
 <li>Output to web apps in <strong>JavaScript</strong>, <strong>TypeScript</strong> and <strong>Python</strong>.</li>
 <li><strong>Spell Editor</strong>:  interactively write, run, and test a program in one window.</li>
 <li><strong>Spell UI</strong>:  powerful, friendly, fully-themed web components for any page.</li>
 <li><strong>VS Code</strong> extension:  syntax colouring, errors and help as you type.</li>
-<li>The <code>spell</code> command line:  compile, run, test and translate projects.</li>
-<li>AI-written spells in VSCode, via Claude Code.</li>
+<li><strong><code>spell</code> command line tool</strong>:  compile, run, test and translate projects.</li>
+<li><strong>AI-written spells via Claude Code</strong> in VSCode.</li>
 </ul>
 <p>Coming soon:</p>
 <ul>
-<li>More human input languages.</li>
-<li>More programming output languages.</li>
-<li>Publish your Spell site on the web.</li>
-<li>Use AI to write a spell on your computer, tablet or phone.</li>
+<li><b>Input</b>: More human languages.</li>
+<li><b>Output</b>: More programming output languages.</li>
+<li><b>Publish</b> your Spell site on the web.</li>
+<li>Use AI to <b>write a spell on your computer, tablet or phone</b>.</li>
 </ul>
-<p>The first release is on its way, targeting <strong>December 2026</strong>.</p>
+<p>The first release is on its way,  targeting <strong>December 2026</strong>.</p>
+
+<p>
+  &copy; Copyright 2018-2026 Matthew Owen Williams.
+  <br>
+  &nbsp;&nbsp;&nbsp;&nbsp; Inquiries to <span class="email" onclick="email()">owenoak at gmail.com</span>
+</p>
 </main>
 </body>
 </html>
